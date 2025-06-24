@@ -1,22 +1,11 @@
 import { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
 import { OAuthClientInformation, OAuthClientInformationSchema, OAuthClientMetadata, OAuthTokens, OAuthTokensSchema } from "@modelcontextprotocol/sdk/shared/auth.js";
-
-// Utility function to generate a server-specific session storage key
-function getServerSpecificKey(baseKey: string, serverUrl: string): string {
-  return `${baseKey}:${serverUrl}`;
-}
-
-enum SESSION_KEYS {
-    SERVER_URL = "mcp-inspector-server-url",
-    CLIENT_INFORMATION = "mcp-inspector-client-information",
-    TOKENS = "mcp-inspector-tokens",
-    CODE_VERIFIER = "mcp-inspector-code-verifier",
-}
-
 export class PetVetMcpClientOAuthClientProvider implements OAuthClientProvider {
   serverUrl: string;
   storedTokens: any;
-  storedClientInformation: any;
+  storedClientInformation: OAuthClientInformation | null = {
+    client_id: "f4fivy7Ga375B3oRso4jb3j6LyMa"
+  };
   storedCodeVerifier: string | null;
 
 constructor(serverUrl: string) {
@@ -25,7 +14,7 @@ constructor(serverUrl: string) {
   }
 
   get redirectUrl() {
-    return window.location.origin + "/oauth/callback";
+    return "http://localhost:8000/oauth/callback";
   }
 
   get clientMetadata(): OAuthClientMetadata {
@@ -45,11 +34,11 @@ constructor(serverUrl: string) {
       return undefined;
     }
 
-    return await OAuthClientInformationSchema.parseAsync(JSON.parse(value));
+    return await OAuthClientInformationSchema.parseAsync(value);
   }
 
   saveClientInformation(clientInformation: OAuthClientInformation) {
-    this.storedClientInformation = JSON.stringify(clientInformation);
+    this.storedClientInformation = clientInformation;
   }
 
   async tokens() {
@@ -66,14 +55,10 @@ constructor(serverUrl: string) {
   }
 
   redirectToAuthorization(authorizationUrl: URL) {
-    window.location.href = authorizationUrl.href;
+    console.log("authorizationUrl", authorizationUrl.href);
   }
 
   saveCodeVerifier(codeVerifier: string) {
-    const key = getServerSpecificKey(
-      SESSION_KEYS.CODE_VERIFIER,
-      this.serverUrl,
-    );
     this.storedCodeVerifier = codeVerifier;
   }
 
