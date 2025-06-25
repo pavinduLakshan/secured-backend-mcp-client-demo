@@ -1,20 +1,24 @@
-import { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
+import { auth, OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
 import { OAuthClientInformation, OAuthClientInformationSchema, OAuthClientMetadata, OAuthTokens, OAuthTokensSchema } from "@modelcontextprotocol/sdk/shared/auth.js";
 export class PetVetMcpClientOAuthClientProvider implements OAuthClientProvider {
   serverUrl: string;
+  request: any;
+  response: any;
   storedTokens: any;
   storedClientInformation: OAuthClientInformation | null = {
     client_id: "f4fivy7Ga375B3oRso4jb3j6LyMa"
   };
   storedCodeVerifier: string | null;
 
-constructor(serverUrl: string) {
+constructor(serverUrl: string, request: any, response: any) {
     // Save the server URL to session storage
     this.serverUrl = serverUrl;
+    this.request = request;
+    this.response = response;
   }
 
   get redirectUrl() {
-    return "http://localhost:8000/oauth/callback";
+    return "http://localhost:3000/oauth/callback";
   }
 
   get clientMetadata(): OAuthClientMetadata {
@@ -55,7 +59,10 @@ constructor(serverUrl: string) {
   }
 
   redirectToAuthorization(authorizationUrl: URL) {
-    console.log("authorizationUrl", authorizationUrl.href);
+    console.log("redirecting to authorizationUrl: ", authorizationUrl.href);
+    this.response.status(200).send({
+      authorizationUrl: authorizationUrl.href,
+    })
   }
 
   saveCodeVerifier(codeVerifier: string) {

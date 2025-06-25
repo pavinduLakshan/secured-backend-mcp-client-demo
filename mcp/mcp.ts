@@ -1,7 +1,8 @@
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { PetVetMcpClientOAuthClientProvider } from "../PetVetMcpOAuthProvider.js";
 
-const vetAssistMcpAuthProvider = new PetVetMcpClientOAuthClientProvider("http://localhost:8080");
+export function getMcpClient(req: any, res: any) {
+const vetAssistMcpAuthProvider = new PetVetMcpClientOAuthClientProvider("http://localhost:8080", req, res);
 
 // Create client and connect to server
 const mcpClient = new MultiServerMCPClient({
@@ -15,19 +16,6 @@ const mcpClient = new MultiServerMCPClient({
 
   // Server configuration
   mcpServers: {
-    // adds a STDIO connection to a server named "math"
-    // math: {
-    //   transport: "stdio",
-    //   command: "npx",
-    //   args: ["-y", "@modelcontextprotocol/server-math"],
-    //   // Restart configuration for stdio transport
-    //   restart: {
-    //     enabled: true,
-    //     maxAttempts: 3,
-    //     delayMs: 1000,
-    //   },
-    // },
-
     // here's a filesystem server
     filesystem: {
       transport: "stdio",
@@ -43,7 +31,7 @@ const mcpClient = new MultiServerMCPClient({
     //   }
     // },
 
-    // OAuth 2.0 authentication (recommended for secure servers) http://localhost:8080/.well-known/oauth-protected-resource
+    // OAuth 2.0 authentication (recommended for secure servers)
     "oauth-protected-server": {
       url: "http://localhost:8080/mcp",
       authProvider: vetAssistMcpAuthProvider,
@@ -66,4 +54,8 @@ const mcpClient = new MultiServerMCPClient({
   },
 });
 
-export { mcpClient, vetAssistMcpAuthProvider };
+return {
+mcpClient,
+vetAssistMcpAuthProvider
+}
+}
