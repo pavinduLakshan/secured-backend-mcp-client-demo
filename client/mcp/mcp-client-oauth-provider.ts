@@ -1,20 +1,24 @@
-import { auth, OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
+import { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
 import { OAuthClientInformation, OAuthClientInformationSchema, OAuthClientMetadata, OAuthTokens, OAuthTokensSchema } from "@modelcontextprotocol/sdk/shared/auth.js";
-export class PetVetMcpClientOAuthClientProvider implements OAuthClientProvider {
+
+export class McpClientOAuthProvider implements OAuthClientProvider {
   serverUrl: string;
   request: any;
   response: any;
   storedTokens: any;
+  sessionId: string;
   storedClientInformation: OAuthClientInformation | null = {
-    client_id: "f4fivy7Ga375B3oRso4jb3j6LyMa"
+    client_id:"f4fivy7Ga375B3oRso4jb3j6LyMa"
   };
   storedCodeVerifier: string | null;
+  scopes: string;
 
-constructor(serverUrl: string, request: any, response: any) {
-    // Save the server URL to session storage
+constructor(serverUrl: string, request: any, response: any, sessionId: string, scopes: string) {
     this.serverUrl = serverUrl;
     this.request = request;
     this.response = response;
+    this.sessionId = sessionId;
+    this.scopes = scopes;
   }
 
   get redirectUrl() {
@@ -25,10 +29,11 @@ constructor(serverUrl: string, request: any, response: any) {
     return {
       redirect_uris: [this.redirectUrl],
       token_endpoint_auth_method: "none",
+      scope: this.scopes, // set of scopes as a space-separated string
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
-      client_name: "MCP Inspector",
-      client_uri: "https://github.com/modelcontextprotocol/inspector",
+      client_name: "Healthcare Assistant",
+      client_uri: "http://localhost:3000",
     };
   }
 
@@ -61,7 +66,7 @@ constructor(serverUrl: string, request: any, response: any) {
   redirectToAuthorization(authorizationUrl: URL) {
     console.log("redirecting to authorizationUrl: ", authorizationUrl.href);
     this.response.status(200).send({
-      authorizationUrl: authorizationUrl.href,
+      authorizationUrl: authorizationUrl.href + `&state=${this.sessionId}`,
     })
   }
 

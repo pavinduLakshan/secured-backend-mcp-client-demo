@@ -1,8 +1,14 @@
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
-import { PetVetMcpClientOAuthClientProvider } from "../PetVetMcpOAuthProvider.js";
+import { McpClientOAuthProvider } from "./mcp-client-oauth-provider.js";
 
-export function getMcpClient(req: any, res: any) {
-const vetAssistMcpAuthProvider = new PetVetMcpClientOAuthClientProvider("http://localhost:8080", req, res);
+export function getMcpClient(req: any, res: any, sessionId: string, scopes: string) {
+  const mcpClientOAuthProvider = new McpClientOAuthProvider(
+    "http://localhost:8080",
+    req,
+    res,
+    sessionId,
+    scopes
+  );
 
 // Create client and connect to server
 const mcpClient = new MultiServerMCPClient({
@@ -34,7 +40,7 @@ const mcpClient = new MultiServerMCPClient({
     // OAuth 2.0 authentication (recommended for secure servers)
     "oauth-protected-server": {
       url: "http://localhost:8080/mcp",
-      authProvider: vetAssistMcpAuthProvider,
+      authProvider: mcpClientOAuthProvider,
       // Can still include custom headers for non-auth purposes
       headers: {
         "User-Agent": "PetVet-MCP-Client/1.0"
@@ -54,8 +60,8 @@ const mcpClient = new MultiServerMCPClient({
   },
 });
 
-return {
-mcpClient,
-vetAssistMcpAuthProvider
-}
+  return {
+    mcpClient,
+    mcpClientOAuthProvider: ""
+  };
 }
